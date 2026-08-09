@@ -1,3 +1,9 @@
+# secrets
+.env
+newt-config.secret
+**/.env
+**/newt-config.secret
+
 # Logs
 logs
 *.log
