@@ -22,5 +22,3 @@ services:
           path: ./Dockerfile
         - action: rebuild
           path: ./compose.dev.yaml
-        - action: rebuild
-          path: ./.env

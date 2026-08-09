@@ -13,6 +13,7 @@ const ENV_MESSAGE_DESTINATION_URL = process.env.RELAY_MESSAGE_DESTINATION_URL;
 const ENV_DISCORD_BOT_TOKEN = process.env.RELAY_DISCORD_BOT_TOKEN;
 const ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS =
   process.env.RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS;
+const canDisplayFullLogs = ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS === "true";
 
 // create a new client instance
 const client = new Client({
@@ -59,7 +60,7 @@ client.on("messageCreate", async (message) => {
       }
 
       // ready to send message
-      if (ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS) {
+      if (canDisplayFullLogs) {
         console.log(
           `Ready to send message "${msgData.content}" from "${msgData.username}" at ${msgData.timestamp}`,
         );
@@ -76,9 +77,9 @@ client.on("messageCreate", async (message) => {
 
       if (response.status === 200) {
         // success, message received
-        if (ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS) {
+        if (canDisplayFullLogs) {
           console.log(
-            `Message "${msgData.content}" sent successfully to destination from username "${msgData.username}" at ${msgData.timestamp}`,
+            `Message "${msgData.content}" sent successfully to destination "${ENV_MESSAGE_DESTINATION_URL}" from username "${msgData.username}" at ${msgData.timestamp}`,
           );
         } else {
           console.log(
@@ -93,7 +94,7 @@ client.on("messageCreate", async (message) => {
       }
     } catch (err) {
       // caught an error while trying to send message
-      if (ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS) {
+      if (canDisplayFullLogs) {
         console.error(
           `Error while trying to send message "${msgData.content}" from username "${msgData.username}" at ${msgData.timestamp}: ${err}`,
         );
