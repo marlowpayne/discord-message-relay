@@ -39,7 +39,6 @@ client.on("messageCreate", async (message) => {
     const msgData = {
       username: message.author.username,
       content: message.content,
-      attachments: message.attachments,
       timestamp: Date(message.createdTimestamp),
     };
 
@@ -75,7 +74,7 @@ client.on("messageCreate", async (message) => {
         body: JSON.stringify(msgData),
       });
 
-      if (response.status === 200) {
+      if (response.ok) {
         // success, message received
         if (canDisplayFullLogs) {
           console.log(

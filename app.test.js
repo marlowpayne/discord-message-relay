@@ -32,7 +32,6 @@ const createMessage = (overrides = {}) => ({
   author: { username: "tester", bot: false },
   content: "Hello, world!",
   channel: { id: "channel1" },
-  attachments: new Map(),
   createdTimestamp: MESSAGE_TIMESTAMP,
   ...overrides,
 });
@@ -123,7 +122,7 @@ describe("app.js", () => {
   it("relays a message to the destination with basic auth when credentials are provided", async () => {
     global.fetch = jest
       .fn()
-      .mockResolvedValue({ status: 200, statusText: "OK" });
+      .mockResolvedValue({ status: 200, statusText: "OK", ok: true });
     const client = await bootApp({
       RELAY_MESSAGE_DESTINATION_USERNAME: "user",
       RELAY_MESSAGE_DESTINATION_PASSWORD: "pass",
@@ -145,7 +144,6 @@ describe("app.js", () => {
     expect(body).toEqual({
       username: "tester",
       content: "Hello, world!",
-      attachments: {},
       timestamp: Date(MESSAGE_TIMESTAMP),
     });
 
@@ -163,7 +161,7 @@ describe("app.js", () => {
   it("relays a message without an authorization header when no credentials are provided", async () => {
     global.fetch = jest
       .fn()
-      .mockResolvedValue({ status: 200, statusText: "OK" });
+      .mockResolvedValue({ status: 200, statusText: "OK", ok: true });
     const client = await bootApp();
     const { messageCreate } = getHandlers(client);
 
@@ -173,10 +171,26 @@ describe("app.js", () => {
     expect(init.headers.Authorization).toBeUndefined();
   });
 
-  it("logs a failure when the destination responds with a non-200 status", async () => {
+  it("treats other 2xx statuses as a successful relay", async () => {
     global.fetch = jest
       .fn()
-      .mockResolvedValue({ status: 500, statusText: "Server Error" });
+      .mockResolvedValue({ status: 201, statusText: "Created", ok: true });
+    const client = await bootApp();
+    const { messageCreate } = getHandlers(client);
+
+    await messageCreate(createMessage());
+
+    expect(console.log).toHaveBeenCalledWith(
+      `Message sent successfully to destination at ${Date(MESSAGE_TIMESTAMP)}`,
+    );
+  });
+
+  it("logs a failure when the destination responds with a non-200 status", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 500,
+      statusText: "Server Error",
+      ok: false,
+    });
     const client = await bootApp();
     const { messageCreate } = getHandlers(client);
 
@@ -190,7 +204,7 @@ describe("app.js", () => {
   it("logs full message details when sensitive data logging is enabled", async () => {
     global.fetch = jest
       .fn()
-      .mockResolvedValue({ status: 200, statusText: "OK" });
+      .mockResolvedValue({ status: 200, statusText: "OK", ok: true });
     const client = await bootApp({
       RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS: "true",
     });
