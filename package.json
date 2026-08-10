@@ -1,15 +1,15 @@
 {
   "name": "discord-message-relay",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A simple relay for Discord that forwards messages to a destination URL",
   "homepage": "https://github.com/marlowpayne/discord-message-relay#readme",
   "bugs": {
     "url": "https://github.com/marlowpayne/discord-message-relay/issues"
   },
   "engines": {
-    "node": ">=24.18.x"
+    "node": ">=24.19.x"
   },
-  "packageManager": "npm@11.16.0",
+  "packageManager": "npm@11.17.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marlowpayne/discord-message-relay.git"
