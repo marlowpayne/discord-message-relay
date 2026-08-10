@@ -23,6 +23,7 @@
     "dev": "nodemon --legacy-watch app.js",
     "devDocker": "docker compose --file compose.dev.yaml up --build --watch",
     "fmt": "prettier --write .",
+    "lint": "prettier --check .",
     "publish": "npm run up && npm run fmt && docker login && npm run buildDocker && docker push marlow2026/discord-message-relay --all-tags",
     "start": "node app.js",
     "test": "jest",
