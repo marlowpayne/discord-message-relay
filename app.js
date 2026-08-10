@@ -36,14 +36,14 @@ client.on("messageCreate", async (message) => {
 
   if (ENV_CHANNEL_IDS_TO_LISTEN.includes(message.channel.id)) {
     console.log(`New message on channel: ${message.channel.id}`);
-    try {
-      const msgData = {
-        username: message.author.username,
-        content: message.content,
-        attachments: message.attachments,
-        timestamp: Date(message.createdTimestamp),
-      };
+    const msgData = {
+      username: message.author.username,
+      content: message.content,
+      attachments: message.attachments,
+      timestamp: Date(message.createdTimestamp),
+    };
 
+    try {
       const headers = {
         "Content-Type": "application/json",
       };
