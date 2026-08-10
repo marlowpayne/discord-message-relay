@@ -1,4 +1,4 @@
-FROM node:24.18.0-alpine3.23 AS build
+FROM node:24.19.0-alpine3.24 AS build
 WORKDIR /app/relay
 
 # Leverage cacheing by installing dependencies first
@@ -10,7 +10,7 @@ COPY . ./
 # run the build command to build out dist/
 RUN [ "npm", "run", "build" ]
 
-FROM node:24.18.0-alpine3.23 AS development
+FROM node:24.19.0-alpine3.24 AS development
 WORKDIR /app/relay
 
 # Install dependencies again for development, if not cached
@@ -23,7 +23,7 @@ COPY . ./
 # start dev server
 CMD [ "npm", "run", "dev" ]
 
-FROM node:24.18.0-alpine3.23 AS production
+FROM node:24.19.0-alpine3.24 AS production
 WORKDIR /app/relay
 # copy over the built dist bundle
 COPY --from=build /app/relay/dist ./
