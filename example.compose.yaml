@@ -1,0 +1,8 @@
+services:
+  discord-message-relay:
+    image: marlow2026/discord-message-relay:prod # Consider pinning to the sha256 digest hash
+    container_name: discord-message-relay
+    hostname: discord-message-relay
+    env_file:
+      - .env
+    restart: unless-stopped

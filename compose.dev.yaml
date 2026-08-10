@@ -1,0 +1,24 @@
+name: message-relay-dev
+
+services:
+  discord-message-relay:
+    container_name: discord-message-relay-dev
+    env_file:
+      - ./.env
+    build:
+      context: ./
+      target: development
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app/relay
+          ignore:
+            - ./node_modules/
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./Dockerfile
+        - action: rebuild
+          path: ./compose.dev.yaml
