@@ -39,7 +39,7 @@ client.on("messageCreate", async (message) => {
     const msgData = {
       username: message.author.username,
       content: message.content,
-      timestamp: Date(message.createdTimestamp),
+      timestamp: new Date(message.createdTimestamp),
     };
 
     try {

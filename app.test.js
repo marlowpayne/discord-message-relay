@@ -144,17 +144,17 @@ describe("app.js", () => {
     expect(body).toEqual({
       username: "tester",
       content: "Hello, world!",
-      timestamp: Date(MESSAGE_TIMESTAMP),
+      timestamp: new Date(MESSAGE_TIMESTAMP).toISOString(),
     });
 
     expect(console.log).toHaveBeenCalledWith(
       "New message on channel: channel1",
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Ready to send message at: ${Date(MESSAGE_TIMESTAMP)}`,
+      `Ready to send message at: ${new Date(MESSAGE_TIMESTAMP)}`,
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Message sent successfully to destination at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message sent successfully to destination at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -181,7 +181,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.log).toHaveBeenCalledWith(
-      `Message sent successfully to destination at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message sent successfully to destination at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -213,10 +213,10 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.log).toHaveBeenCalledWith(
-      `Ready to send message "Hello, world!" from "tester" at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Ready to send message "Hello, world!" from "tester" at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Message "Hello, world!" sent successfully to destination "https://destination.example" from username "tester" at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message "Hello, world!" sent successfully to destination "https://destination.example" from username "tester" at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -230,7 +230,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.error).toHaveBeenCalledWith(
-      `Error while trying to send message "Hello, world!" from username "tester" at ${Date(MESSAGE_TIMESTAMP)}: Error: network down`,
+      `Error while trying to send message "Hello, world!" from username "tester" at ${new Date(MESSAGE_TIMESTAMP)}: Error: network down`,
     );
   });
 
@@ -242,7 +242,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.error).toHaveBeenCalledWith(
-      `Error while trying to send message at ${Date(MESSAGE_TIMESTAMP)}: Error: network down`,
+      `Error while trying to send message at ${new Date(MESSAGE_TIMESTAMP)}: Error: network down`,
     );
   });
 });
