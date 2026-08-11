@@ -2,9 +2,8 @@ import "dotenv/config";
 import { Client, Events, GatewayIntentBits } from "discord.js";
 
 // env vars
-const ENV_CHANNEL_IDS_TO_LISTEN = JSON.parse(
-  process.env.RELAY_DISCORD_CHANNEL_IDS,
-);
+const ENV_CHANNEL_IDS_TO_LISTEN = process.env.RELAY_DISCORD_CHANNEL_IDS;
+const channelsToListenTo = new Set(JSON.parse(ENV_CHANNEL_IDS_TO_LISTEN));
 const ENV_MESSAGE_DESTINATION_USERNAME =
   process.env.RELAY_MESSAGE_DESTINATION_USERNAME;
 const ENV_MESSAGE_DESTINATION_PASSWORD =
@@ -30,11 +29,11 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 // main message handler
-client.on("messageCreate", async (message) => {
-  if (message.author == client.user) return; // ignore own messages
+client.on(Events.MessageCreate, async (message) => {
+  if (message.author.id === client.user.id) return; // ignore own messages
   if (message.author.bot) return; // ignore other bots' messages
 
-  if (ENV_CHANNEL_IDS_TO_LISTEN.includes(message.channel.id)) {
+  if (channelsToListenTo.has(message.channel.id)) {
     console.log(`New message on channel: ${message.channel.id}`);
     const msgData = {
       username: message.author.username,

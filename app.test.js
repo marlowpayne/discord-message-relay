@@ -5,12 +5,12 @@ jest.mock("discord.js", () => {
     this.on = jest.fn();
     this.once = jest.fn();
     this.login = jest.fn();
-    this.user = null;
+    this.user = { id: "relay-bot", username: "relay-bot", bot: true };
   });
 
   return {
     Client,
-    Events: { ClientReady: "clientReady" },
+    Events: { ClientReady: "clientReady", MessageCreate: "messageCreate" },
     GatewayIntentBits: { Guilds: 1, GuildMessages: 2, MessageContent: 4 },
   };
 });
@@ -29,7 +29,7 @@ const MESSAGE_TIMESTAMP = 1700000000000;
 
 // helper function for test messages
 const createMessage = (overrides = {}) => ({
-  author: { username: "tester", bot: false },
+  author: { id: "user1", username: "tester", bot: false },
   content: "Hello, world!",
   channel: { id: "channel1" },
   createdTimestamp: MESSAGE_TIMESTAMP,
@@ -90,7 +90,7 @@ describe("app.js", () => {
 
   it("ignores messages sent by the client itself", async () => {
     const client = await bootApp();
-    const author = { username: "tester", bot: false };
+    const author = { id: "relay-bot", username: "tester", bot: false };
     client.user = author;
     const { messageCreate } = getHandlers(client);
 
