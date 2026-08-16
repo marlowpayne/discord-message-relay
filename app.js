@@ -3,7 +3,6 @@ import { Client, Events, GatewayIntentBits } from "discord.js";
 
 // env vars
 const ENV_CHANNEL_IDS_TO_LISTEN = process.env.RELAY_DISCORD_CHANNEL_IDS;
-const channelsToListenTo = new Set(JSON.parse(ENV_CHANNEL_IDS_TO_LISTEN));
 const ENV_MESSAGE_DESTINATION_USERNAME =
   process.env.RELAY_MESSAGE_DESTINATION_USERNAME;
 const ENV_MESSAGE_DESTINATION_PASSWORD =
@@ -13,6 +12,36 @@ const ENV_DISCORD_BOT_TOKEN = process.env.RELAY_DISCORD_BOT_TOKEN;
 const ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS =
   process.env.RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS;
 const canDisplayFullLogs = ENV_RELAY_DISPLAY_SENSITIVE_DATA_IN_LOGS === "true";
+
+// validate required env vars are set
+const REQUIRED_ENV_VARS = {
+  RELAY_DISCORD_BOT_TOKEN: ENV_DISCORD_BOT_TOKEN,
+  RELAY_MESSAGE_DESTINATION_URL: ENV_MESSAGE_DESTINATION_URL,
+  RELAY_DISCORD_CHANNEL_IDS: ENV_CHANNEL_IDS_TO_LISTEN,
+};
+
+const missingEnvVars = Object.entries(REQUIRED_ENV_VARS)
+  .filter(([, value]) => !value)
+  .map(([name]) => name);
+
+if (missingEnvVars.length > 0) {
+  throw new Error(
+    `Missing required environment variable(s): ${missingEnvVars.join(", ")}`,
+  );
+}
+
+let channelsToListenTo;
+// validate format for passed channel IDs
+try {
+  const parsed = JSON.parse(ENV_CHANNEL_IDS_TO_LISTEN);
+  if (!Array.isArray(parsed) || parsed.some((id) => typeof id !== "string")) {
+    throw new TypeError(`Expected a JSON array of strings, e.g. ["123","456"]`);
+  }
+  channelsToListenTo = new Set(parsed);
+} catch (err) {
+  const message = `Error while reading RELAY_DISCORD_CHANNEL_IDS: ${err.message}`;
+  throw new Error(message);
+}
 
 // create a new client instance
 const client = new Client({

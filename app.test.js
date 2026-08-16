@@ -77,6 +77,24 @@ describe("app.js", () => {
     expect(client.login).toHaveBeenCalledWith("test-token");
   });
 
+  it("throws an error when a required env var is missing", async () => {
+    await expect(bootApp({ RELAY_DISCORD_BOT_TOKEN: "" })).rejects.toThrow(
+      "Missing required environment variable(s): RELAY_DISCORD_BOT_TOKEN",
+    );
+  });
+
+  it("throws an error when RELAY_DISCORD_CHANNEL_IDS is not valid JSON", async () => {
+    await expect(
+      bootApp({ RELAY_DISCORD_CHANNEL_IDS: "not-json" }),
+    ).rejects.toThrow(/Error while reading RELAY_DISCORD_CHANNEL_IDS/);
+  });
+
+  it("throws an error when RELAY_DISCORD_CHANNEL_IDS is not an array of strings", async () => {
+    await expect(
+      bootApp({ RELAY_DISCORD_CHANNEL_IDS: "[123]" }),
+    ).rejects.toThrow(/Expected a JSON array of strings/);
+  });
+
   it("logs a ready message once the client is ready", async () => {
     const client = await bootApp();
     const { clientReady } = getHandlers(client);
