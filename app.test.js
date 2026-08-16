@@ -5,12 +5,12 @@ jest.mock("discord.js", () => {
     this.on = jest.fn();
     this.once = jest.fn();
     this.login = jest.fn();
-    this.user = null;
+    this.user = { id: "relay-bot", username: "relay-bot", bot: true };
   });
 
   return {
     Client,
-    Events: { ClientReady: "clientReady" },
+    Events: { ClientReady: "clientReady", MessageCreate: "messageCreate" },
     GatewayIntentBits: { Guilds: 1, GuildMessages: 2, MessageContent: 4 },
   };
 });
@@ -29,7 +29,7 @@ const MESSAGE_TIMESTAMP = 1700000000000;
 
 // helper function for test messages
 const createMessage = (overrides = {}) => ({
-  author: { username: "tester", bot: false },
+  author: { id: "user1", username: "tester", bot: false },
   content: "Hello, world!",
   channel: { id: "channel1" },
   createdTimestamp: MESSAGE_TIMESTAMP,
@@ -77,6 +77,24 @@ describe("app.js", () => {
     expect(client.login).toHaveBeenCalledWith("test-token");
   });
 
+  it("throws an error when a required env var is missing", async () => {
+    await expect(bootApp({ RELAY_DISCORD_BOT_TOKEN: "" })).rejects.toThrow(
+      "Missing required environment variable(s): RELAY_DISCORD_BOT_TOKEN",
+    );
+  });
+
+  it("throws an error when RELAY_DISCORD_CHANNEL_IDS is not valid JSON", async () => {
+    await expect(
+      bootApp({ RELAY_DISCORD_CHANNEL_IDS: "not-json" }),
+    ).rejects.toThrow(/Error while reading RELAY_DISCORD_CHANNEL_IDS/);
+  });
+
+  it("throws an error when RELAY_DISCORD_CHANNEL_IDS is not an array of strings", async () => {
+    await expect(
+      bootApp({ RELAY_DISCORD_CHANNEL_IDS: "[123]" }),
+    ).rejects.toThrow(/Expected a JSON array of strings/);
+  });
+
   it("logs a ready message once the client is ready", async () => {
     const client = await bootApp();
     const { clientReady } = getHandlers(client);
@@ -90,7 +108,7 @@ describe("app.js", () => {
 
   it("ignores messages sent by the client itself", async () => {
     const client = await bootApp();
-    const author = { username: "tester", bot: false };
+    const author = { id: "relay-bot", username: "tester", bot: false };
     client.user = author;
     const { messageCreate } = getHandlers(client);
 
@@ -144,17 +162,17 @@ describe("app.js", () => {
     expect(body).toEqual({
       username: "tester",
       content: "Hello, world!",
-      timestamp: Date(MESSAGE_TIMESTAMP),
+      timestamp: new Date(MESSAGE_TIMESTAMP).toISOString(),
     });
 
     expect(console.log).toHaveBeenCalledWith(
       "New message on channel: channel1",
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Ready to send message at: ${Date(MESSAGE_TIMESTAMP)}`,
+      `Ready to send message at: ${new Date(MESSAGE_TIMESTAMP)}`,
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Message sent successfully to destination at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message sent successfully to destination at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -181,7 +199,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.log).toHaveBeenCalledWith(
-      `Message sent successfully to destination at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message sent successfully to destination at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -213,10 +231,10 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.log).toHaveBeenCalledWith(
-      `Ready to send message "Hello, world!" from "tester" at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Ready to send message "Hello, world!" from "tester" at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
     expect(console.log).toHaveBeenCalledWith(
-      `Message "Hello, world!" sent successfully to destination "https://destination.example" from username "tester" at ${Date(MESSAGE_TIMESTAMP)}`,
+      `Message "Hello, world!" sent successfully to destination "https://destination.example" from username "tester" at ${new Date(MESSAGE_TIMESTAMP)}`,
     );
   });
 
@@ -230,7 +248,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.error).toHaveBeenCalledWith(
-      `Error while trying to send message "Hello, world!" from username "tester" at ${Date(MESSAGE_TIMESTAMP)}: Error: network down`,
+      `Error while trying to send message "Hello, world!" from username "tester" at ${new Date(MESSAGE_TIMESTAMP)}: Error: network down`,
     );
   });
 
@@ -242,7 +260,7 @@ describe("app.js", () => {
     await messageCreate(createMessage());
 
     expect(console.error).toHaveBeenCalledWith(
-      `Error while trying to send message at ${Date(MESSAGE_TIMESTAMP)}: Error: network down`,
+      `Error while trying to send message at ${new Date(MESSAGE_TIMESTAMP)}: Error: network down`,
     );
   });
 });
